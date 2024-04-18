@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -14,6 +13,7 @@ import (
 	storepb "github.com/yourselfhosted/slash/proto/gen/store"
 	"github.com/yourselfhosted/slash/server/metric"
 	"github.com/yourselfhosted/slash/server/profile"
+	"github.com/yourselfhosted/slash/server/assets"
 	"github.com/yourselfhosted/slash/store"
 )
 
@@ -39,6 +39,7 @@ func (s *FrontendService) Serve(ctx context.Context, e *echo.Echo) {
 	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 		HTML5: true,
 		Root:  "dist",
+		Filesystem: http.FS(assets.WebAssets),
 		Skipper: func(c echo.Context) bool {
 			return util.HasPrefixes(c.Path(), "/api", "/slash.api.v1", "/robots.txt", "/sitemap.xml", "/s/:shortcutName")
 		},
@@ -163,7 +164,7 @@ func generateCollectionMetadata(collection *storepb.Collection) *Metadata {
 }
 
 func getRawIndexHTML() string {
-	bytes, _ := os.ReadFile("dist/index.html")
+	bytes, _ := assets.WebAssets.ReadFile("dist/index.html")
 	return string(bytes)
 }
 
